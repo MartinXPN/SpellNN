@@ -14,13 +14,13 @@ TODO
 ### Model Architecture
 TODO
 
-# Training
+### Training
 TODO
 
-# Evaluation & Results
+### Evaluation & Results
 TODO
 
-# Installation
+### Installation
 ```bash
 git clone git@github.com:MartinXPN/SpellNN.git && cd SpellNN
 pip install .[tf-gpu]  # Or `pip install .[tf]` if no gpu support is needed
