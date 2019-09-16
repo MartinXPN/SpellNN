@@ -15,8 +15,6 @@ setup(
         'joblib>=0.13.2',
         'Keras>=2.2.4',
         'numpy>=1.16.1',
-        'nltk>=3.4.5',
-        'gensim>=3.8.0',
         'scikit-learn>=0.20.2',
         'tqdm>=4.31.1',
         'keras-contrib @ git+https://www.github.com/keras-team/keras-contrib@master',
