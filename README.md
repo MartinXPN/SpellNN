@@ -10,6 +10,14 @@ TODO
 
 ### Datasets
 TODO
+```bash
+wiki2text.py --locale en --path datasets/en-articles.bz2 \                      # download latest pages-articles in XML format
+             -o datasets/data/wiki/ --processes 4 datasets/en-articles.bz2 \    # parse the XML with WikiExtractor
+             --wiki_dir datasets/data/wiki --output_path datasets/en_wiki.txt   # convert to .txt
+
+# Cleanup
+rm -rf datasets/data datasets/*articles.bz2
+```
 
 ### Model Architecture
 TODO

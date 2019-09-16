@@ -1,7 +1,13 @@
+#!/usr/bin/env python
+
 import glob
 import re
 from itertools import chain
 from multiprocessing import Pool
+from pathlib import Path
+
+from wikiextractor import WikiExtractor
+import urllib.request
 
 import fire as fire
 from tqdm import tqdm
@@ -63,7 +69,7 @@ def _apply_lst(args):
     return num, func(*params, **kwargs)
 
 
-def main(wiki_dir, output_path):
+def parse(wiki_dir, output_path):
     wiki_files = []
     for filename in glob.iglob(f'{wiki_dir}/*/*', recursive=True):
         wiki_files.append(filename)
@@ -75,6 +81,16 @@ def main(wiki_dir, output_path):
             f.write(article + '\n\n')
 
 
+def download(locale, path):
+    if Path(path).exists():
+        print(f'The path `{path}` already exists. Skipping download...')
+        return
+
+    url = f'http://dumps.wikimedia.org/{locale}wiki/latest/{locale}wiki-latest-pages-articles.xml.bz2'
+    urllib.request.urlretrieve(url, path)
+
+
 if __name__ == '__main__':
-    sw = None
-    fire.Fire(main)
+    fire.Fire(download)
+    WikiExtractor.main()
+    fire.Fire(parse)

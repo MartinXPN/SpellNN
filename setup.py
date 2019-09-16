@@ -9,6 +9,9 @@ setup(
     python_requires='>=3.6.0',
     url='https://github.com/MartinXPN/SpellNN',
     packages=find_packages(exclude=('tests',)),
+    scripts=[
+        'spellnn/data/wiki2text.py',
+    ],
     install_requires=[
         'GitPython>=2.1.11',
         'fire>=0.1.3',
@@ -18,6 +21,7 @@ setup(
         'scikit-learn>=0.20.2',
         'tqdm>=4.31.1',
         'keras-contrib @ git+https://www.github.com/keras-team/keras-contrib@master',
+        'wikiextractor @ git+https://github.com/attardi/wikiextractor.git@refs/pull/180/merge',
     ],
     extras_require={
         'tf': ['tensorflow>=1.12.0'],
