@@ -17,7 +17,7 @@ setup(
         'fire>=0.1.3',
         'joblib>=0.13.2',
         'Keras>=2.2.4',
-        'numpy>=1.16.1',
+        'numpy<=1.16.4,>=1.13.3',
         'scikit-learn>=0.20.2',
         'tqdm>=4.31.1',
         'keras-contrib @ git+https://www.github.com/keras-team/keras-contrib@master',
