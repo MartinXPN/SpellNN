@@ -3,7 +3,7 @@ import string
 from pathlib import Path
 from unittest import TestCase
 
-from spellnn.data.dataset import PlainTextFileDataset
+from spellnn.data.dataset import PlainTextFileDataset, LargeTextFileDataset
 
 
 class TestDataset(TestCase):
@@ -55,6 +55,32 @@ class TestDataset(TestCase):
         dataset_lines = [sample.text for sample in dataset]
         self.assertCountEqual(dataset_lines, lines, f'{dataset_lines} != {lines}')
         self.assertFalse(all([dataset_line == line for dataset_line, line in zip(dataset_lines, lines)]))
+
+    def doCleanups(self):
+        super().doCleanups()
+        if self.file_path and self.file_path.exists():
+            self.file_path.unlink()
+
+
+class TestLargeDataset(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.file_path = None
+
+    def test_small_file_loading(self):
+        self.file_path = Path('small.txt')
+        lines = [u'Line one', u'Line two,', u'Третья строка!', u'Línea tres.']
+
+        with open(self.file_path, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(lines))
+            # Additional newline because LargeTextFileDataset counts number of samples
+            # by counting number of newlines in the file
+            f.write('\n')
+
+        dataset = LargeTextFileDataset(file_path=self.file_path)
+        self.assertEqual(len(dataset), len(lines))
+        for i in range(len(lines)):
+            self.assertEqual(dataset[i].text, lines[i])
 
     def doCleanups(self):
         super().doCleanups()
