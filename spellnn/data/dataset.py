@@ -1,7 +1,7 @@
 import abc
 import atexit
-import math
 import random
+from functools import partial
 from pathlib import Path
 from typing import List, Iterator, overload, Union
 
@@ -49,10 +49,7 @@ class PlainTextFileDataset(Dataset):
     def __init__(self, file_path: Union[str, Path]):
         self.data = []
         with open(file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if line != '':
-                    self.data.append(Sample(line))
+            self.data = [Sample(line) for line in f]
 
     def __len__(self) -> int:
         return len(self.data)
@@ -81,20 +78,21 @@ class LargeTextFileDataset(Dataset, abc.ABC):
     As plain text files can be large and reach up to several GB in storage,
     this class implements lazy loading of the dataset file.
     """
-    def __init__(self, file_path: str):
-        self.f = open(file_path, 'r')
-        self.sample_count = 0
-        self.processed_once = False
+    def __init__(self, file_path: Union[str, Path]):
+        self.nb_samples = self.file_lines(file_path=file_path)
 
+        self.f = open(file_path, 'r')
         atexit.register(self.cleanup)
 
     def cleanup(self):
-        self.f.close()
+        if not self.f.closed:
+            self.f.close()
+
+    @classmethod
+    def file_lines(cls, file_path: Union[str, Path]) -> int:
+        with open(file_path, 'rb') as f:
+            bufgen = iter(partial(f.raw.read, 1024 * 1024), b'')
+            return sum(buf.count(b'\n') for buf in bufgen)
 
     def __len__(self) -> int:
-        """
-        __len__ is infinity before reaching the end of file for the first time.
-        After that, the number of samples is fixed
-        :return: number of samples in the dataset
-        """
-        return self.sample_count if self.processed_once else math.inf
+        return self.nb_samples

@@ -1,7 +1,6 @@
 import random
 import string
 from pathlib import Path
-from textwrap import dedent
 from unittest import TestCase
 
 from spellnn.data.dataset import PlainTextFileDataset
@@ -18,14 +17,7 @@ class TestDataset(TestCase):
         lines = [u'Line one', u'Line two,', u'Третья строка!', u'Línea tres.']
 
         with open(self.file_path, 'w', encoding='utf-8') as f:
-            f.write(dedent(f'''
-            {lines[0]}
-            
-            {lines[1]}
-            {lines[2]}
-            
-            
-            {lines[3]}'''))
+            f.write('\n'.join(lines))
 
         dataset = PlainTextFileDataset(file_path=self.file_path)
         self.assertEqual(len(dataset), len(lines))
@@ -37,14 +29,7 @@ class TestDataset(TestCase):
         lines = [u'Line one', u'Line two,', u'Третья строка!', u'Línea tres.']
 
         with open(self.file_path, 'w', encoding='utf-8') as f:
-            f.write(dedent(f'''
-            {lines[0]}
-
-            {lines[1]}
-            {lines[2]}
-
-
-            {lines[3]}'''))
+            f.write('\n'.join(lines))
 
         dataset = PlainTextFileDataset(file_path=self.file_path)
         self.assertEqual(len(dataset), len(lines))

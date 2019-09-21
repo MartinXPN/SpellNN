@@ -78,7 +78,7 @@ def parse(wiki_dir, output_path):
 
     with open(output_path, 'w', encoding='utf-8') as f:
         for article in tqdm(chain.from_iterable(articles)):
-            f.write(article + '\n\n')
+            f.write(article + '\n')
 
 
 def download(locale, path):
