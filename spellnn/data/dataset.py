@@ -49,7 +49,7 @@ class PlainTextFileDataset(Dataset):
     def __init__(self, file_path: Union[str, Path]):
         self.data = []
         with open(file_path, 'r', encoding='utf-8') as f:
-            self.data = [Sample(line) for line in f]
+            self.data = [Sample(text=line.strip()) for line in f]
 
     def __len__(self) -> int:
         return len(self.data)
