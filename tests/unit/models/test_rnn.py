@@ -2,10 +2,9 @@ from pathlib import Path
 from unittest import TestCase
 
 import numpy as np
+import tensorflow as tf
 
 from spellnn.models.rnn import RNNSpellChecker
-
-import tensorflow as tf
 
 keras = tf.keras
 from keras.utils import CustomObjectScope

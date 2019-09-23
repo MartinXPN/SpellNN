@@ -1,8 +1,8 @@
 from typing import Iterable
 
 import tensorflow as tf
+
 keras = tf.keras
-from tensorflow.lookup import StaticHashTable, KeyValueTensorInitializer
 from keras.layers import Layer
 
 
@@ -16,8 +16,8 @@ class CharMapping(Layer):
         self.chars += chars
         self.chars = list(dict.fromkeys(self.chars))
 
-        self.table = StaticHashTable(
-            initializer=KeyValueTensorInitializer(
+        self.table = tf.lookup.StaticHashTable(
+            initializer=tf.lookup.KeyValueTensorInitializer(
                 keys=tf.constant(self.chars),
                 values=tf.constant(list(range(len(self.chars)))),
             ),
