@@ -16,6 +16,7 @@ class MappingLayerTest(unittest.TestCase):
     def test_save_load_execution(self):
         batch_size = 2
         nb_chars = 12
+        nb_words = 5
 
         with CustomObjectScope({'CharMapping': CharMapping}):
             output = layer_test(CharMapping,
@@ -27,10 +28,10 @@ class MappingLayerTest(unittest.TestCase):
 
             output = layer_test(CharMapping,
                                 kwargs={'chars': ['<s>', 'b', 'i', 'k', 'c', 'т'], 'include_unknown': False},
-                                input_shape=(batch_size, 5, nb_chars),
+                                input_shape=(batch_size, nb_words, nb_chars),
                                 input_dtype=np.string_,
                                 expected_output_dtype=tf.int32)
-            self.assertEqual(np.array(output).shape, (batch_size, nb_chars))
+            self.assertEqual(np.array(output).shape, (batch_size, nb_words, nb_chars))
 
     def test_mapping(self):
         chars = ['<s>', 'b', 'i', 'k', 'c', 'т']
