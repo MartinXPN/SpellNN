@@ -1,6 +1,8 @@
 from typing import Tuple
 
-from keras import Model, Input
+import tensorflow as tf
+keras = tf.keras
+from keras import Input, Model
 from keras.layers import LSTM, Dense, Embedding
 
 
