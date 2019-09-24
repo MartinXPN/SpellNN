@@ -13,18 +13,21 @@ from keras.models import load_model
 
 class TestRNNModel(TestCase):
 
+    def setUp(self):
+        self.chars = ['<s>', 'b', 'v', 'c', 'т']
+        self.model = RNNSpellChecker(chars=self.chars)
+
     def test_rnn_construction(self):
-        model = RNNSpellChecker()
-        model.summary()
+        self.model.summary()
 
     def test_input_output_shape(self):
-        model = RNNSpellChecker()
-        model.compile(optimizer='adam', loss='categorical_crossentropy')
-        model.summary()
+        self.model.compile(optimizer='adam', loss='categorical_crossentropy')
+        self.model.summary()
 
-        inputs = np.ones(shape=(1, 9), dtype='uint8')
-        outputs = model.predict(inputs)
-        self.assertEqual(outputs.shape, (1, 9, 64))
+        inputs = ['bv', 'i', 'c', 'v']
+        outputs = self.model.predict(np.array([inputs]))
+        print(outputs)
+        self.assertEqual(outputs.shape, (1, len(inputs), len(self.chars) + 1))
 
 
 class TestLoadSave(TestCase):
