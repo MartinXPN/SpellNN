@@ -3,6 +3,7 @@ Multi-language Neural Spell-checking
 
 
 [![Build Status](https://travis-ci.org/MartinXPN/SpellNN.svg?branch=master)](https://travis-ci.org/MartinXPN/SpellNN)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/MartinXPN/SpellNN/blob/master/LICENSE)
 
 
 ### Code organization
