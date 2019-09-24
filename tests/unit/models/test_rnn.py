@@ -3,6 +3,7 @@ from unittest import TestCase
 
 import numpy as np
 import tensorflow as tf
+from spellnn.layers.mapping import CharMapping
 
 from spellnn.models.rnn import RNNSpellChecker
 
@@ -32,17 +33,18 @@ class TestRNNModel(TestCase):
 
 class TestLoadSave(TestCase):
     def setUp(self):
-        self.model = RNNSpellChecker()
+        self.chars = ['<s>', 'b', 'v', 'p', 'u']
+        self.model = RNNSpellChecker(chars=self.chars)
         self.model.compile(optimizer='adam', loss='categorical_crossentropy')
         self.file_path = Path('rnn-model.h5')
         self.tf_lite_path = Path('rnn-model.tflite')
 
     def test_save_load(self):
-        inputs = np.ones(shape=(1, 9), dtype='uint8')
+        inputs = np.array([['bv', 'b', 'v', 'u']])
         before_saving = self.model.predict(inputs)
 
         self.model.save(filepath=self.file_path)
-        with CustomObjectScope({'RNNSpellChecker': RNNSpellChecker}):
+        with CustomObjectScope({'RNNSpellChecker': RNNSpellChecker, 'CharMapping': CharMapping}):
             model = load_model(self.file_path)
             self.assertIsInstance(model, RNNSpellChecker)
 
@@ -52,7 +54,7 @@ class TestLoadSave(TestCase):
     def test_tf_lite(self):
         self.skipTest('Current version of tf and keras don\'t support exporting to tf.lite')
         self.model.save(self.file_path)
-        with CustomObjectScope({'RNNSpellChecker': RNNSpellChecker}):
+        with CustomObjectScope({'RNNSpellChecker': RNNSpellChecker, 'CharMapping': CharMapping}):
             model = load_model(self.file_path)
 
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
