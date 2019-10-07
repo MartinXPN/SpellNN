@@ -6,7 +6,7 @@ setup(
     description='Python package for neural spell checking',
     author='Martin Mirakyan',
     author_email='mirakyanmartin@gmail.com',
-    python_requires='>=3.6.0',
+    python_requires='>=3.7.0',
     url='https://github.com/MartinXPN/SpellNN',
     packages=find_packages(exclude=('tests',)),
     scripts=[
