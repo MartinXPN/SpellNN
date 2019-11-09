@@ -1,18 +1,22 @@
-from typing import Iterable
+from typing import Iterable, Optional
 
 import tensorflow as tf
-
-keras = tf.keras
-from keras.layers import Layer
+from tensorflow.keras.layers import Layer
+# from tensorflow.lookup import StaticHashTable, KeyValueTensorInitializer
 
 
 class CharMapping(Layer):
     def __init__(self,
                  chars: Iterable[str],
                  include_unknown: bool = True,
+                 padding: Optional[str] = None,
                  **kwargs):
         super().__init__(**kwargs)
-        self.chars = ['<UNK>'] if include_unknown else []
+        self.chars = []
+        if include_unknown:
+            self.chars += ['<UNK>']
+        if padding:
+            self.chars += [padding]
         self.chars += chars
         self.chars = list(dict.fromkeys(self.chars))
 

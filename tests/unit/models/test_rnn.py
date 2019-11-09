@@ -3,20 +3,20 @@ from unittest import TestCase
 
 import numpy as np
 import tensorflow as tf
-from spellnn.layers.mapping import CharMapping
+from tensorflow.keras.utils import CustomObjectScope
+from tensorflow.keras.models import load_model
+from tensorflow.keras import Model
+from tensorflow.keras.layers import Input
 
 from spellnn.models.rnn import RNNSpellChecker
-
-keras = tf.keras
-from keras.utils import CustomObjectScope
-from keras.models import load_model
 
 
 class TestRNNModel(TestCase):
 
     def setUp(self):
-        self.chars = ['<s>', 'b', 'v', 'c', 'т']
-        self.model = RNNSpellChecker(chars=self.chars)
+        self.chars = ['<s>', 'b', 'v', 'c', 'т', '<UNK>']
+        self.nb_classes = len(self.chars)
+        self.model = RNNSpellChecker(nb_classes=self.nb_classes)
 
     def test_rnn_construction(self):
         self.model.summary()
@@ -25,26 +25,27 @@ class TestRNNModel(TestCase):
         self.model.compile(optimizer='adam', loss='categorical_crossentropy')
         self.model.summary()
 
-        inputs = ['bv', 'i', 'c', 'v']
-        outputs = self.model.predict(np.array([inputs]))
+        inputs = np.ones(shape=(1, 15))
+        outputs = self.model.predict(inputs)
         print(outputs)
-        self.assertEqual(outputs.shape, (1, len(inputs), len(self.chars) + 1))
+        self.assertEqual(outputs.shape, inputs.shape + (self.nb_classes,))
 
 
 class TestLoadSave(TestCase):
     def setUp(self):
-        self.chars = ['<s>', 'b', 'v', 'p', 'u']
-        self.model = RNNSpellChecker(chars=self.chars)
+        self.chars = ['<s>', 'b', 'v', 'c', 'т', '<UNK>']
+        self.nb_classes = len(self.chars)
+        self.model = RNNSpellChecker(nb_classes=self.nb_classes)
         self.model.compile(optimizer='adam', loss='categorical_crossentropy')
         self.file_path = Path('rnn-model.h5')
         self.tf_lite_path = Path('rnn-model.tflite')
 
     def test_save_load(self):
-        inputs = np.array([['bv', 'b', 'v', 'u']])
+        inputs = np.random.rand(1, 15)
         before_saving = self.model.predict(inputs)
 
         self.model.save(filepath=self.file_path)
-        with CustomObjectScope({'RNNSpellChecker': RNNSpellChecker, 'CharMapping': CharMapping}):
+        with CustomObjectScope({'RNNSpellChecker': RNNSpellChecker}):
             model = load_model(self.file_path)
             self.assertIsInstance(model, RNNSpellChecker)
 
@@ -52,10 +53,14 @@ class TestLoadSave(TestCase):
         self.assertTrue(np.array_equal(before_saving, after_saving))
 
     def test_tf_lite(self):
-        self.skipTest('Current version of tf and keras don\'t support exporting to tf.lite')
+        self.skipTest('The current version of tf and keras don\'t support exporting LSTM layers to tf.lite')
         self.model.save(self.file_path)
-        with CustomObjectScope({'RNNSpellChecker': RNNSpellChecker, 'CharMapping': CharMapping}):
+        with CustomObjectScope({'RNNSpellChecker': RNNSpellChecker}):
             model = load_model(self.file_path)
+            # TF-lite demands to have a fixed size inputs for all the inputs other than the batch dimension
+            fixed_input = Input(shape=(512,))
+            fixed_output = model(fixed_input)
+            model = Model(fixed_input, fixed_output)
 
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
         tf_lite_model = converter.convert()
