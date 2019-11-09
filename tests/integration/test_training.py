@@ -1,6 +1,7 @@
 from pprint import pprint
 from unittest import TestCase
 
+from spellnn import get_project_root
 from spellnn.train import Gym
 
 
@@ -8,7 +9,9 @@ class TestOverFitting(TestCase):
     def setUp(self):
         self.trainer = Gym()
         self.batch_size = 32
-        self.trainer.construct_dataset(path='../../datasets/sample.txt', locale='en',
+        self.dataset_path = get_project_root() / 'datasets' / 'sample.txt'
+        print(self.dataset_path)
+        self.trainer.construct_dataset(path=str(self.dataset_path), locale='en',
                                        batch_size=self.batch_size, train_samples=50)
         self.trainer.valid_dataset = self.trainer.train_dataset
         self.trainer.create_model(name='RNNSpellChecker')(nb_classes=100, hidden_units=(128, 64))
