@@ -5,17 +5,16 @@ from tensorflow.keras.layers import Layer
 
 
 class CharMapping(Layer):
+    UNK = '<UNK>'
+
     def __init__(self,
                  chars: Iterable[str],
                  include_unknown: bool = True,
-                 padding: Optional[str] = None,
                  **kwargs):
         super().__init__(**kwargs)
         self.chars = []
         if include_unknown:
-            self.chars += ['<UNK>']
-        if padding:
-            self.chars += [padding]
+            self.chars += [self.UNK]
         self.chars += chars
         self.chars = list(dict.fromkeys(self.chars))
 

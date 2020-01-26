@@ -52,3 +52,11 @@ class MappingLayerTest(unittest.TestCase):
         self.assertEqual(model.predict(np.array(['c']))[0][0], chars.index('c'))
         self.assertEqual(model.predict(np.array(['т']))[0][0], chars.index('т'))
         self.assertEqual(model.predict(np.array(['<s>']))[0][0], chars.index('<s>'))
+
+    def test_config(self):
+        chars = ['<s>', 'b', 'i', 'k', 'c', 'т']
+        mapping = CharMapping(chars=chars, include_unknown=True)
+        print(mapping.get_config())
+        self.assertTrue(CharMapping.UNK in mapping.get_config()['chars'])
+        self.assertTrue('b' in mapping.get_config()['chars'])
+        self.assertTrue('<s>' in mapping.get_config()['chars'])

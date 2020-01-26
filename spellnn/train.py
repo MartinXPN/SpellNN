@@ -24,7 +24,7 @@ class Gym:
         self.model: Optional[Model] = None
 
     def construct_dataset(self, path: str, locale: str, batch_size: int = 32, train_samples: int = 1000):
-        self.char2int = CharMapping(chars=get_chars(locale), padding='<PAD>')
+        self.char2int = CharMapping(chars=get_chars(locale), default='<PAD>')
 
     def create_model(self, name):
         arguments = signature(getattr(models, name).__init__)

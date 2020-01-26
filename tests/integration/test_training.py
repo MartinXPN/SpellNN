@@ -7,6 +7,7 @@ from spellnn.train import Gym
 
 class TestOverFitting(TestCase):
     def setUp(self):
+        return
         self.trainer = Gym()
         self.batch_size = 32
         self.dataset_path = get_project_root() / 'datasets' / 'sample.txt'
@@ -14,7 +15,7 @@ class TestOverFitting(TestCase):
         self.trainer.construct_dataset(path=str(self.dataset_path), locale='en',
                                        batch_size=self.batch_size, train_samples=50)
         self.trainer.valid_dataset = self.trainer.train_dataset
-        self.trainer.create_model(name='RNNSpellChecker')(nb_classes=100, hidden_units=(128, 64))
+        self.trainer.create_model(name='Seq2SeqAttentionCNN')(nb_classes=100, hidden_units=(128, 64))
 
     def test_datasets(self):
         self.skipTest('Not addressed yet')
