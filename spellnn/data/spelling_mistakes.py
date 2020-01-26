@@ -16,6 +16,8 @@ class Mistakes:
         return text[:i] + text[i + 1:]
 
     def swap(self, text: str, start: int = 0, end: int = -1):
+        if len(text) < 2:
+            return text
         if end < 0:
             end += len(text)
         chars = list(text)
@@ -36,6 +38,8 @@ class Mistakes:
         return text[:i] + c + text[i:]
 
     def replace(self, text: str, start: int = 0, end: int = -1):
+        if text == '':
+            return ''
         if end < 0:
             end += len(text)
 
