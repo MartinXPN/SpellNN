@@ -1,4 +1,6 @@
 language: python
+cache: pip
+
 python:
   - '3.7'
 
@@ -9,4 +11,4 @@ install:
   - python -m spacy download en_core_web_sm
 
 script:
-  - pytest tests --cov=spellnn
+  - pytest tests --cov=spellnn --cov-report term-missing
