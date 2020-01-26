@@ -3,13 +3,12 @@ import os
 from inspect import signature, Parameter
 from textwrap import dedent
 from typing import Optional
-import string
 
 import fire
-import homoglyphs as hg
 import tensorflow as tf
 from tensorflow.keras import Model
 
+from spellnn.data.alphabet import get_chars
 from spellnn.layers.mapping import CharMapping
 from spellnn import models
 
@@ -23,13 +22,6 @@ def to_sample(line):
     outputs = ['a'] + initial
     outputs = outputs[:64]
     return inputs, outputs
-
-
-def get_chars(locale):
-    return list(dict.fromkeys(
-        list(string.printable) +
-        list(hg.Languages.get_alphabet([locale]))
-    ))
 
 
 class Gym:
