@@ -37,11 +37,11 @@ class TestOverFitting(TestCase):
             pass
 
     def test_training_once(self):
+        self.skipTest('Takes long on travis')
         history = self.trainer.train(epochs=2)
         pprint(history)
 
     def test_overfitting(self):
-        self.skipTest('Not addressed yet')
         self.skipTest('Takes too long to test on Travis every time')
         history = self.trainer.train(epochs=10)
         self.assertGreaterEqual(history['val_accuracy'][-1], 0.99)
