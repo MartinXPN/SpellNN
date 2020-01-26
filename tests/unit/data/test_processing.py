@@ -1,6 +1,6 @@
 import string
 import unittest
-from typing import List
+from typing import List, Union
 
 import numpy as np
 
@@ -11,11 +11,13 @@ from spellnn.data.processing import DataProcessor
 class DataProcessingTest(unittest.TestCase):
 
     def setUp(self):
-        self.processor = DataProcessor(locale='en', char2id=self.map_to_id, alphabet=string.printable)
+        self.processor = DataProcessor(locale='en', char2id=self, alphabet=string.printable)
         self.char2id = {c: i for i, c in enumerate([alphabet.START, alphabet.END] + list(string.printable))}
 
-    def map_to_id(self, text: List[str]):
-        res = [self.char2id.get(c, 0) for c in text]
+    def __getitem__(self, item: Union[List[str], str]):
+        if isinstance(item, str):
+            return self.char2id.get(item, 0)
+        res = [self.char2id.get(c, 0) for c in item]
         return np.array(res)
 
     def test_one_line_processing(self):

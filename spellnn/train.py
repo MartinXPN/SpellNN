@@ -9,7 +9,10 @@ import tensorflow as tf
 from tensorflow.keras import Model
 
 from spellnn import models
+from spellnn.data import alphabet
 from spellnn.data.alphabet import get_chars
+from spellnn.data.processing import DataProcessor
+from spellnn.data.util import nb_lines
 from spellnn.layers.mapping import CharMapping
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # FATAL
@@ -22,9 +25,39 @@ class Gym:
         self.valid_dataset: Optional[tf.data.Dataset] = None
         self.char2int: Optional[CharMapping] = None
         self.model: Optional[Model] = None
+        self.nb_train_samples: int = 0
+        self.nb_valid_samples: int = 0
+        self.batch_size = 0
 
-    def construct_dataset(self, path: str, locale: str, batch_size: int = 32, train_samples: int = 1000):
-        self.char2int = CharMapping(chars=get_chars(locale), default='<PAD>')
+    def construct_dataset(self, path: str, locale: str, batch_size: int = 32, validation_split: float = 0.3):
+        all_chars = [alphabet.START + alphabet.END] + get_chars(locale)
+        self.char2int = CharMapping(chars=all_chars, include_unknown=True)
+        data_processor = DataProcessor(locale=locale, char2id=self.char2int, alphabet=all_chars)
+
+        print('Calculating number of lines in the file...', end=' ')
+        all_samples = nb_lines(path)
+        print(all_samples)
+
+        self.batch_size = batch_size
+        self.nb_train_samples = int((1 - validation_split) * all_samples)
+        self.nb_valid_samples = all_samples - self.nb_train_samples
+
+        dataset = tf.data.TextLineDataset(path)
+        self.train_dataset = dataset.take(self.nb_train_samples)
+        self.train_dataset = self.train_dataset.shuffle(10 * batch_size, seed=42, reshuffle_each_iteration=True)
+        self.train_dataset = self.train_dataset.batch(batch_size, drop_remainder=True)
+        self.train_dataset = self.train_dataset.map(
+            lambda b: tf.numpy_function(func=data_processor.process_batch, inp=[b], Tout=['int32', 'int32', 'int32']))
+        self.train_dataset = self.train_dataset.map(lambda enc_in, dec_in, targ: ((enc_in, dec_in), targ))
+        self.train_dataset = self.train_dataset.repeat()
+
+        self.valid_dataset = dataset.skip(self.nb_train_samples)
+        self.valid_dataset = self.valid_dataset.shuffle(10 * batch_size, seed=42, reshuffle_each_iteration=True)
+        self.valid_dataset = self.valid_dataset.batch(batch_size, drop_remainder=True)
+        self.valid_dataset = self.valid_dataset.map(
+            lambda b: tf.numpy_function(func=data_processor.process_batch, inp=[b], Tout=['int32', 'int32', 'int32']))
+        self.valid_dataset = self.valid_dataset.map(lambda enc_in, dec_in, targ: ((enc_in, dec_in), targ))
+        self.valid_dataset = self.valid_dataset.repeat()
 
     def create_model(self, name):
         arguments = signature(getattr(models, name).__init__)
@@ -43,12 +76,13 @@ class Gym:
         '''), {'self': self, name: getattr(models, name), arg_str: arg_str})
         return getattr(self, name)
 
-    def train(self, epochs: int, steps_per_epoch: int, validation_steps: int):
-        self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-        history = self.model.fit(self.train_dataset,
-                                 epochs=epochs, steps_per_epoch=steps_per_epoch,
-                                 validation_data=self.valid_dataset, validation_steps=validation_steps,
-                                 verbose=1, workers=4, use_multiprocessing=True)
+    def train(self, epochs: int):
+        self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['acc'])
+        history = self.model.fit_generator(self.train_dataset.as_numpy_iterator(),
+                                           steps_per_epoch=self.nb_train_samples // self.batch_size,
+                                           validation_data=self.valid_dataset.as_numpy_iterator(),
+                                           validation_steps=self.nb_valid_samples // self.batch_size,
+                                           epochs=epochs)
         return history.history
 
 

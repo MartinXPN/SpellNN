@@ -34,7 +34,7 @@ class DataProcessor:
 
     def process_input(self, line: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         encoder_inputs, decoder_inputs, targets = self.to_sample(line)
-        return self.char2id(encoder_inputs), self.char2id(decoder_inputs), self.char2id(targets)
+        return self.char2id[encoder_inputs], self.char2id[decoder_inputs], self.char2id[targets]
 
     def doc_to_spans(self, texts: List[str], join_string: str = ' ||| ') -> List:
         all_docs = self.nlp(join_string.join(texts))
@@ -52,7 +52,6 @@ class DataProcessor:
 
         batch = np.array([self.process_input(line) for line in lines])
         encoder_batch, decoder_batch, target_batch = batch[:, 0, ...], batch[:, 1, ...], batch[:, 2, ...]
-        end_id = self.char2id([alphabet.END])[0]
-        return (pad_sequences(encoder_batch, padding='post', truncating='post', value=end_id),
-                pad_sequences(decoder_batch, padding='post', truncating='post', value=end_id),
-                pad_sequences(target_batch, padding='post', truncating='post', value=end_id))
+        return (pad_sequences(encoder_batch, padding='post', truncating='post', value=self.char2id[alphabet.END]),
+                pad_sequences(decoder_batch, padding='post', truncating='post', value=self.char2id[alphabet.END]),
+                pad_sequences(target_batch, padding='post', truncating='post', value=self.char2id[alphabet.END]))

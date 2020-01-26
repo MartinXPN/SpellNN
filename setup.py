@@ -27,8 +27,8 @@ setup(
         'wikiextractor @ git+https://github.com/attardi/wikiextractor.git@refs/pull/180/merge',
     ],
     extras_require={
-        'tf': ['tensorflow>=2.0.0'],
-        'tf_gpu': ['tensorflow-gpu>=2.0.0'],
+        'tf': ['tensorflow>=2.1.0'],
+        'tf_gpu': ['tensorflow-gpu>=2.1.0'],
         'analysis': ['matplotlib>=3.0.3', 'notebook>=6.0.1'],
         'test': ['coverage', 'pytest', 'pytest-cov'],
     },

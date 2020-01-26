@@ -60,3 +60,10 @@ class MappingLayerTest(unittest.TestCase):
         self.assertTrue(CharMapping.UNK in mapping.get_config()['chars'])
         self.assertTrue('b' in mapping.get_config()['chars'])
         self.assertTrue('<s>' in mapping.get_config()['chars'])
+
+    def test_char2id(self):
+        chars = ['<s>', 'b', 'i', 'k', 'c', 'т']
+        mapping = CharMapping(chars=chars, include_unknown=False)
+        self.assertEqual(mapping['<s>'], 0)
+        self.assertListEqual(list(mapping[('b', 'i')]), [1, 2])
+        self.assertEqual(len(mapping), len(chars))
