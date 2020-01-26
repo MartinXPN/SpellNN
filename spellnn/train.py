@@ -53,8 +53,7 @@ class Gym:
             .shuffle(500, seed=42, reshuffle_each_iteration=True) \
             .padded_batch(batch_size=batch_size,
                           padded_shapes=([-1], [-1]),
-                          padding_values=(tf.constant(0, dtype=tf.int32),
-                                          tf.constant(0, dtype=tf.int32))) \
+                          padding_values=(tf.constant(0, dtype=tf.int32), tf.constant(0, dtype=tf.int32))) \
             .repeat()
         self.valid_dataset = dataset.skip(train_samples) \
             .shuffle(500, seed=42, reshuffle_each_iteration=True) \

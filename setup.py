@@ -18,6 +18,7 @@ setup(
         'joblib>=0.13.2',
         'numpy>=1.13.3',
         'scikit-learn>=0.20.2',
+        'nltk>=3.4.5',
         'tqdm>=4.31.1',
         'homoglyphs>=1.3.5',
         'keras-contrib @ git+https://github.com/keras-team/keras-contrib@master',

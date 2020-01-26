@@ -2,7 +2,6 @@ from typing import Iterable, Optional
 
 import tensorflow as tf
 from tensorflow.keras.layers import Layer
-# from tensorflow.lookup import StaticHashTable, KeyValueTensorInitializer
 
 
 class CharMapping(Layer):
@@ -25,7 +24,7 @@ class CharMapping(Layer):
                 keys=tf.constant(self.chars),
                 values=tf.constant(list(range(len(self.chars)))),
             ),
-            default_value=tf.constant(0),
+            default_value=0,
         )
 
     def call(self, inputs, **kwargs):
