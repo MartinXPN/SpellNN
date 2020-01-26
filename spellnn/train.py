@@ -8,20 +8,12 @@ import fire
 import tensorflow as tf
 from tensorflow.keras import Model
 
+from spellnn import models
 from spellnn.data.alphabet import get_chars
 from spellnn.layers.mapping import CharMapping
-from spellnn import models
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # FATAL
 logging.getLogger('tensorflow').setLevel(logging.FATAL)
-
-
-def to_sample(line):
-    initial = list(line.numpy().decode('utf-8'))[:64]
-    inputs = initial[:64]
-    outputs = ['a'] + initial
-    outputs = outputs[:64]
-    return inputs, outputs
 
 
 class Gym:
@@ -33,27 +25,6 @@ class Gym:
 
     def construct_dataset(self, path: str, locale: str, batch_size: int = 32, train_samples: int = 1000):
         self.char2int = CharMapping(chars=get_chars(locale), padding='<PAD>')
-
-        def all_to_num(*inputs):
-            return tuple([self.char2int(t) for t in inputs])
-
-        dataset = tf.data.TextLineDataset(path)
-        dataset = dataset.map(lambda line: tf.py_function(func=to_sample, inp=[line], Tout=[tf.string, tf.string]))
-        dataset = dataset.map(lambda input_text, label: all_to_num(input_text, label))
-
-        self.train_dataset = dataset.take(train_samples) \
-            .shuffle(500, seed=42, reshuffle_each_iteration=True) \
-            .padded_batch(batch_size=batch_size,
-                          padded_shapes=([-1], [-1]),
-                          padding_values=(tf.constant(0, dtype=tf.int32), tf.constant(0, dtype=tf.int32))) \
-            .repeat()
-        self.valid_dataset = dataset.skip(train_samples) \
-            .shuffle(500, seed=42, reshuffle_each_iteration=True) \
-            .padded_batch(batch_size=batch_size,
-                          padded_shapes=([-1], [-1]),
-                          padding_values=(tf.constant(0, dtype=tf.int32),
-                                          tf.constant(0, dtype=tf.int32))) \
-            .repeat()
 
     def create_model(self, name):
         arguments = signature(getattr(models, name).__init__)

@@ -17,6 +17,7 @@ class TestOverFitting(TestCase):
         self.trainer.create_model(name='RNNSpellChecker')(nb_classes=100, hidden_units=(128, 64))
 
     def test_datasets(self):
+        self.skipTest('Not addressed yet')
         for ex in self.trainer.train_dataset.take(2):
             print(len(ex), ex[0].numpy().shape, ex[1].numpy().shape)
             print(ex)
@@ -25,6 +26,7 @@ class TestOverFitting(TestCase):
                                     'Generate correct batch size (less for remainder)')
 
     def test_overfitting(self):
+        self.skipTest('Not addressed yet')
         self.skipTest('Takes too long to test on Travis every time')
         history = self.trainer.train(epochs=10, steps_per_epoch=500, validation_steps=2)
         self.assertGreaterEqual(history['val_accuracy'][-1], 0.99)

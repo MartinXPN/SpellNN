@@ -6,6 +6,7 @@ install:
   - pip install --upgrade pip
   - pip install --upgrade setuptools
   - pip install -e ".[tf,test]" --progress-bar off
+  - python -m spacy download en_core_web_sm
 
 script:
   - pytest tests --cov=spellnn
