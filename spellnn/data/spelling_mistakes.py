@@ -1,11 +1,12 @@
 import math
 import random
-from typing import List
+from typing import List, Optional
 
 
 class Mistakes:
-    def __init__(self, alphabet: List[str]):
+    def __init__(self, alphabet: List[str], weights: Optional[List[float]] = None):
         self.alphabet = alphabet
+        self.weights = weights
 
     def delete(self, text: str, start: int = 0, end: int = -1):
         if text == '':
@@ -33,7 +34,7 @@ class Mistakes:
         if end < 0:
             end += len(text)
 
-        c = random.choice(self.alphabet)
+        c = random.choices(self.alphabet, weights=self.weights, k=1)[0]
         i = random.randint(start, end)
         return text[:i] + c + text[i:]
 
@@ -43,7 +44,7 @@ class Mistakes:
         if end < 0:
             end += len(text)
 
-        c = random.choice(self.alphabet)
+        c = random.choices(self.alphabet, weights=self.weights, k=1)[0]
         i = random.randint(start, end)
         return text[:i] + c + text[i + 1:]
 

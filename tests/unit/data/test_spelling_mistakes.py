@@ -59,7 +59,12 @@ class TextSpellingMistakesApplicationTest(unittest.TestCase):
 
     def setUp(self):
         self.alphabet = list(string.printable)
-        self.mistakes = Mistakes(alphabet=self.alphabet)
+        self.weights = [0.5 if c.isalpha() and c.islower() else
+                        0.2 if c.isalpha() else
+                        0.1 for c in self.alphabet]
+        self.mistakes = Mistakes(alphabet=self.alphabet, weights=self.weights)
+        print(f'alphabet: {self.alphabet}')
+        print(f'weights: {self.weights}')
 
     def test_random_string(self):
         s = 'some pretty long string that will be modified'
