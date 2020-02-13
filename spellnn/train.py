@@ -35,7 +35,7 @@ class Gym:
 
     def construct_dataset(self, path: str, locale: str, batch_size: int = 32, validation_split: float = 0.3):
         pprint(locals())
-        all_chars = [alphabet.START + alphabet.END] + get_chars(locale)
+        all_chars = [alphabet.START, alphabet.END] + get_chars(locale)
         char_weights = [0.5 if c.isalpha() and c.islower() else
                         0.2 if c.isalpha() else
                         0.1 if c not in {alphabet.START, alphabet.END} else
