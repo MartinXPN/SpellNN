@@ -1,5 +1,5 @@
 import random
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import numpy as np
 import spacy
@@ -11,14 +11,17 @@ from spellnn.data.spelling_mistakes import apply_spelling_errors, Mistakes
 
 
 class DataProcessor:
-    def __init__(self, locale: str, char2id, alphabet: List[str], cache_limit: int = 1e6):
+    def __init__(self, locale: str, char2id,
+                 alphabet: List[str], alphabet_weighs: Optional[List[float]] = None,
+                 cache_limit: int = 1e6):
         self.nlp = spacy.load("en_core_web_sm", disable=['tagger', 'parser', 'textcat'])
         print('Initialized SpaCY with pipes:', self.nlp.pipe_names)
         self.detokenize = MosesDetokenizer(lang=locale).detokenize
         self.batch_docs = {}
         self.char2id = char2id
         self.alphabet = alphabet
-        self.mistakes = Mistakes(alphabet=alphabet)
+        self.alphabet_weighs = alphabet_weighs
+        self.mistakes = Mistakes(alphabet=alphabet, weights=alphabet_weighs)
         self.cache_limit = cache_limit
 
     def to_sample(self, line: str) -> Tuple[List[str], List[str], List[str]]:

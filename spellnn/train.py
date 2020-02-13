@@ -1,6 +1,7 @@
 import logging
 import os
 from inspect import signature, Parameter
+from pprint import pprint
 from textwrap import dedent
 from typing import Optional
 
@@ -30,9 +31,15 @@ class Gym:
         self.batch_size = 0
 
     def construct_dataset(self, path: str, locale: str, batch_size: int = 32, validation_split: float = 0.3):
+        pprint(locals())
         all_chars = [alphabet.START + alphabet.END] + get_chars(locale)
+        char_weights = [0.5 if c.isalpha() and c.islower() else
+                        0.2 if c.isalpha() else
+                        0.1 if c not in {alphabet.START, alphabet.END} else
+                        0 for c in all_chars]
         self.char2int = CharMapping(chars=all_chars, include_unknown=True)
-        data_processor = DataProcessor(locale=locale, char2id=self.char2int, alphabet=all_chars)
+        data_processor = DataProcessor(locale=locale, char2id=self.char2int,
+                                       alphabet=all_chars, alphabet_weighs=char_weights)
 
         print('Calculating number of lines in the file...', end=' ')
         all_samples = nb_lines(path)
@@ -58,11 +65,13 @@ class Gym:
             lambda b: tf.numpy_function(func=data_processor.process_batch, inp=[b], Tout=['int32', 'int32', 'int32']))
         self.valid_dataset = self.valid_dataset.map(lambda enc_in, dec_in, targ: ((enc_in, dec_in), targ))
         self.valid_dataset = self.valid_dataset.repeat()
+        return self
 
     def create_model(self, name):
         arguments = signature(getattr(models, name).__init__)
         arguments = {k: v.default for k, v in arguments.parameters.items()
                      if v.default is not Parameter.empty and k != 'self'}
+        arguments['nb_symbols'] = len(self.char2int)
         arg_str = ', '.join([f'{k}=' + str(v) if type(v) != str else f'{k}=' '"' + str(v) + '"'
                              for k, v in arguments.items()])
         # print(arg_str)
@@ -76,13 +85,15 @@ class Gym:
         '''), {'self': self, name: getattr(models, name), arg_str: arg_str})
         return getattr(self, name)
 
-    def train(self, epochs: int):
+    def train(self, epochs: int, use_multiprocessing: bool = False):
+        pprint(locals())
         self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['acc'])
         history = self.model.fit_generator(self.train_dataset.as_numpy_iterator(),
                                            steps_per_epoch=self.nb_train_samples // self.batch_size,
                                            validation_data=self.valid_dataset.as_numpy_iterator(),
                                            validation_steps=self.nb_valid_samples // self.batch_size,
-                                           epochs=epochs)
+                                           epochs=epochs,
+                                           use_multiprocessing=use_multiprocessing, workers=os.cpu_count() - 1)
         return history.history
 
 
