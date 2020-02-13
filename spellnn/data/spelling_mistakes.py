@@ -59,7 +59,8 @@ def apply_spelling_errors(text: str, mistakes: Mistakes):
         * Stage 1 - generate possible modifications that could be applied to the text (word or span)
         * Stage 2 - pick modifications by probability and apply randomly
     """
-    nb_errors = int(math.log2(len(text)))
+    nb_errors = int(math.sqrt(len(text)))
+    # print(f'Applying {nb_errors} errors to the string of length: {len(text)}')
     modifications = random.choices(population=[mistakes.delete, mistakes.insert, mistakes.replace, mistakes.swap],
                                    weights=[0.2, 0.3, 0.3, 0.4],
                                    k=nb_errors)
