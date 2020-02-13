@@ -1,12 +1,15 @@
 import logging
 import os
+from datetime import datetime
 from inspect import signature, Parameter
+from pathlib import Path
 from pprint import pprint
 from textwrap import dedent
-from typing import Optional
+from typing import Optional, Union
 
 import fire
 import tensorflow as tf
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, TerminateOnNaN
 from tensorflow.keras import Model
 
 from spellnn import models
@@ -85,15 +88,32 @@ class Gym:
         '''), {'self': self, name: getattr(models, name), arg_str: arg_str})
         return getattr(self, name)
 
-    def train(self, epochs: int, use_multiprocessing: bool = False):
+    def train(self, epochs: int, monitor_metric='val_acc', patience: int = 5,
+              steps_per_epoch: Union[int, str] = 'auto', validation_steps: Union[int, str] = 'auto',
+              log_dir: str = 'logs',
+              use_multiprocessing: bool = False):
         pprint(locals())
+        log_dir = Path(log_dir).joinpath(datetime.now().replace(microsecond=0).isoformat())
+        model_path = Path(log_dir).joinpath('checkpoints').joinpath('best-model.h5py')
+        model_path = str(model_path)
+
+        if steps_per_epoch == 'auto':
+            steps_per_epoch = self.nb_train_samples // self.batch_size
+        if validation_steps == 'auto':
+            validation_steps = self.nb_valid_samples // self.batch_size
+
         self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['acc'])
-        history = self.model.fit_generator(self.train_dataset.as_numpy_iterator(),
-                                           steps_per_epoch=self.nb_train_samples // self.batch_size,
-                                           validation_data=self.valid_dataset.as_numpy_iterator(),
-                                           validation_steps=self.nb_valid_samples // self.batch_size,
-                                           epochs=epochs,
-                                           use_multiprocessing=use_multiprocessing, workers=os.cpu_count() - 1)
+        history = self.model.fit_generator(
+            self.train_dataset.as_numpy_iterator(), steps_per_epoch=steps_per_epoch,
+            validation_data=self.valid_dataset.as_numpy_iterator(), validation_steps=validation_steps,
+            epochs=epochs,
+            use_multiprocessing=use_multiprocessing, workers=os.cpu_count() - 1,
+            callbacks=[
+                TerminateOnNaN(),
+                TensorBoard(log_dir=log_dir),
+                ModelCheckpoint(model_path, monitor=monitor_metric, verbose=1, save_best_only=True),
+                EarlyStopping(monitor=monitor_metric, patience=patience),
+            ])
         return history.history
 
 
